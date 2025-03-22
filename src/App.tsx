@@ -1,26 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import AuthComponent from "./Authorization/AuthComponent";
+import TaskForm from "./Authorization/TaskForm";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "./Authorization/firebaseConfig";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <AppRoutes />
+    </Router>
   );
-}
+};
+
+const AppRoutes: React.FC = () => {
+  const [user, loading] = useAuthState(auth);
+
+  if (loading) return <p>Loading...</p>; // Avoid redirecting while Firebase is still checking auth state
+
+  return (
+    <Routes>
+      <Route path="/" element={user ? <Navigate to="/tasks" /> : <AuthComponent />} />
+      <Route path="/tasks" element={user ? <TaskForm user={user}/> : <Navigate to="/auth" />} />
+      <Route path="/auth" element={<AuthComponent />} />
+    </Routes>
+  );
+};
 
 export default App;
