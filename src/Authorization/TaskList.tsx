@@ -158,6 +158,15 @@ const TaskList: React.FC<TaskListProps> = ({
                     borderBottom: "none",
                   }}
                 >
+                  Description
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: "bold",
+                    whiteSpace: "nowrap",
+                    borderBottom: "none",
+                  }}
+                >
                   Due on
                 </TableCell>
                 <TableCell
@@ -167,7 +176,7 @@ const TaskList: React.FC<TaskListProps> = ({
                     borderBottom: "none",
                   }}
                 >
-                  Task Status
+                  Status
                 </TableCell>
                 <TableCell
                   sx={{

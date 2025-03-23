@@ -22,7 +22,9 @@ import { SelectChangeEvent } from "@mui/material";
 import TaskList from "./TaskList";
 import Header from "./Header";
 import { Task } from "../type";
-
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import {styled} from "@mui/material/styles";
 const TaskForm = ({ user }: { user: any }) => {
   const [open, setOpen] = useState(false);
   const [task, setTask] = useState<Task>({
@@ -269,121 +271,177 @@ const TaskForm = ({ user }: { user: any }) => {
         handleDeleteTask={handleDeleteTask}
         viewMode={viewMode}
       />
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
-  <DialogTitle
-    sx={{
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      bgcolor: "#7B1984",
-      color: "white",
-      fontWeight: "bold",
-    }}
-  >
-    Create Task
-  </DialogTitle>
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm" slotProps={{paper: {sx: { borderRadius: "16px"}}}}>
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: "white",
+            color: "black",
+            fontWeight: "bold",
+            border: "none", 
+            borderBottom: "2px solid #F5F5F5", 
+            padding: "5px"
+          }}
+        >
+          Create Task
+        </DialogTitle>
+          <br></br>
+        <DialogContent sx={{ p: 3 }}>
+        <TextField
+            label="Title"
+            name="title"
+            value={task.title}
+            onChange={(e) => setTask({ ...task, title: e.target.value })}
+            fullWidth
+            required
+            size="small" // Reduces height
+            sx={{
+              mb: 2,
+              backgroundColor: "#F5F5F5",
+              "& .MuiInputBase-root": {
+                height: "36px", // Adjusts height
+              },
+              "& .MuiInputBase-input": {
+                fontSize: "14px", // Adjusts text size
+                padding: "10px", // Adjusts padding inside the field
+              },
+            }}
+          />
 
-  <DialogContent sx={{ p: 3 }}>
-    <TextField
-      label="Title"
-      name="title"
-      value={task.title}
-      onChange={(e) => setTask({ ...task, title: e.target.value })}
-      fullWidth
-      required
-      sx={{ mb: 2 }}
-    />
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body1" sx={{ mb: 1, fontWeight: "bold", color: "gray" }}>
+              Description
+            </Typography>
 
-    <TextField
-      label="Description"
-      name="description"
-      value={task.description}
-      onChange={(e) => setTask({ ...task, description: e.target.value })}
-      fullWidth
-      required
-      multiline
-      rows={3}
-      sx={{ mb: 2 }}
-    />
+            <Box
+              sx={{
+                backgroundColor: "#F5F5F5",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                "& .ql-toolbar": {
+                  /* width: "100%", */
+                  order: 2, // Moves toolbar below
+                  borderTop: "1px solid #ccc",
+                  backgroundColor: "#F5F5F5",
+                  /* borderRadius: "0 0 8px 8px", */
+                },
+                "& .ql-container": {
+                  order: 1, // Ensures text area stays above
+                  minHeight: "120px",
+                  /* backgroundColor: "#fff",
+                  paddingBottom: "5px",
+                  borderRadius: "8px 8px 0 0", */
+                },
+              }}
+            >
+              <ReactQuill
+                value={task.description}
+                onChange={(value) => setTask({ ...task, description: value })}
+                theme="snow"
+                modules={{
+                  toolbar: [
+                    ["bold", "italic"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                  ],
+                }}
+                style={{ minHeight: "150px" }}
+              />
+            </Box>
+          </Box>
 
-    <TextField
-      type="date"
-      name="dueDate"
-      value={task.dueDate}
-      onChange={(e) => setTask({ ...task, dueDate: e.target.value })}
-      fullWidth
-      required
-      sx={{ mb: 2 }}
-    />
+          <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
+            {/* Category Buttons */}
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant={task.category === "work" ? "contained" : "outlined"}
+                onClick={() => setTask({ ...task, category: "work" })}
+                sx={{ borderColor: "grey", color: "grey", borderRadius: "20px" }}
+              >
+                Work
+              </Button>
+              <Button
+                variant={task.category === "personal" ? "contained" : "outlined"}
+                onClick={() => setTask({ ...task, category: "personal" })}
+                sx={{ borderColor: "grey", color: "grey", borderRadius: "20px" }}
+              >
+                Personal
+              </Button>
+            </Box>
 
-    <FormControl fullWidth sx={{ mb: 2 }}>
-      <InputLabel>Category</InputLabel>
-      <Select
-        name="category"
-        value={task.category}
-        onChange={(e) => setTask({ ...task, category: e.target.value })}
-        displayEmpty
-      >
-        <MenuItem value="work">Work</MenuItem>
-        <MenuItem value="personal">Personal</MenuItem>
-      </Select>
-    </FormControl>
+            {/* Due Date Picker */}
+            <TextField
+              type="date"
+              name="dueDate"
+              value={task.dueDate}
+              onChange={(e) => setTask({ ...task, dueDate: e.target.value })}
+              required
+              sx={{ backgroundColor: "#F5F5F5", flex: 1 }}
+            />
 
-    <FormControl fullWidth sx={{ mb: 2 }}>
-      <InputLabel>Status</InputLabel>
-      <Select
-        name="status"
-        value={task.status}
-        onChange={(e) =>
-          setTask({
-            ...task,
-            status: e.target.value as "todo" | "in-progress" | "completed",
-          })
-        }
-        displayEmpty
-      >
-        <MenuItem value="todo">To-Do</MenuItem>
-        <MenuItem value="in-progress">In Progress</MenuItem>
-        <MenuItem value="completed">Completed</MenuItem>
-      </Select>
-    </FormControl>
-  </DialogContent>
+            {/* Status Dropdown */}
+            <FormControl sx={{ flex: 1 }}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                name="status"
+                value={task.status}
+                sx={{ backgroundColor: "#F5F5F5" }}
+                onChange={(e) =>
+                  setTask({
+                    ...task,
+                    status: e.target.value as "todo" | "in-progress" | "completed",
+                  })
+                }
+                displayEmpty
+              >
+                <MenuItem value="todo">To-Do</MenuItem>
+                <MenuItem value="in-progress">In Progress</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
 
-  <DialogActions sx={{ px: 3, pb: 3 }}>
-    <Button
-      onClick={() => setOpen(false)}
-      sx={{ color: "#7B1984", fontWeight: "bold" }}
-    >
-      Cancel
-    </Button>
-    <Button
-      onClick={async () => {
-        await firestoreService.addTask(user.uid, {
-          ...task,
-          id: crypto.randomUUID(),
-          createdAt: new Date(),
-        });
-        fetchTasks();
-        setTask({
-          id: "",
-          title: "",
-          description: "",
-          category: "",
-          dueDate: "",
-          status: "todo",
-        });
-        setOpen(false);
-      }}
-      variant="contained"
-      sx={{
-        backgroundColor: "#7B1984",
-        fontWeight: "bold",
-        "&:hover": { backgroundColor: "#5A1263" },
-      }}
-    >
-      Add Task
-    </Button>
-  </DialogActions>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={() => setOpen(false)}
+            sx={{ color: "#7B1984", fontWeight: "bold" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              await firestoreService.addTask(user.uid, {
+                ...task,
+                id: crypto.randomUUID(),
+                createdAt: new Date(),
+              });
+              fetchTasks();
+              setTask({
+                id: "",
+                title: "",
+                description: "",
+                category: "",
+                dueDate: "",
+                status: "todo",
+              });
+              setOpen(false);
+            }}
+            variant="contained"
+            sx={{
+              backgroundColor: "#7B1984",
+              fontWeight: "bold",
+              "&:hover": { backgroundColor: "#5A1263" },
+            }}
+          >
+            Add Task
+          </Button>
+        </DialogActions>
 </Dialog>
 
     </Box>
