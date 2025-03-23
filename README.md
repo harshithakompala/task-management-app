@@ -1,46 +1,112 @@
-# Getting Started with Create React App
+# TaskBuddy
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Overview
+TaskBuddy is a responsive task management application built with React and Firebase. It enables users to manage their tasks efficiently with features like authentication, task categorization, drag-and-drop functionality, batch actions. The application supports both list and board views, providing a seamless user experience across different screen sizes.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Features Implemented
 
-### `npm start`
+### **Authentication**
+- User sign-up and login using Firebase Authentication.
+- Secure session management.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### **Task Management**
+- Create, edit, delete, and update tasks.
+- Categorization into **To-Do, In Progress, and Completed** sections.
+- Drag-and-drop functionality for easy status updates.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### **Task Organization**
+- **List View**: Displays tasks in a structured list format.
+- **Board View**: Visual representation of tasks in categorized columns.
+- **Filtering & Sorting**: Users can filter tasks by category or due date.
+- **Batch Actions**: Mark multiple tasks as completed or delete them in bulk.
 
-### `npm test`
+### **Additional Enhancements**
+- Due date selection with a dropdown-style calendar.
+- Mobile and desktop responsiveness using Material UI (MUI).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## How to Run the Project
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### **Prerequisites**
+Ensure you have the following installed:
+- **Node.js** (latest LTS version recommended)
+- **Git**
+- **Firebase CLI** (for Firebase setup)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### **Setup Instructions**
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-repository/taskbuddy.git
+   cd taskbuddy
+   ```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+3. **Set up Firebase**
+   - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/).
+   - Enable Firestore Database & Authentication.
+   - Copy Firebase config and create a `.env` file:
+     ```env
+     REACT_APP_FIREBASE_API_KEY=your_api_key
+     REACT_APP_FIREBASE_AUTH_DOMAIN=your_auth_domain
+     REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+     ```
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
+5. **Access the application**
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Challenges Faced & Solutions Implemented
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 1. **Task Drag-and-Drop Implementation**
+   **Challenge:** Ensuring smooth drag-and-drop behavior while maintaining real-time updates.
+   **Solution:** Used `react-beautiful-dnd` to manage drag-and-drop and synchronized data updates with Firestore.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 2. **State Management for Large-Scale Tasks**
+   **Challenge:** Handling task updates efficiently without excessive re-renders.
+   **Solution:** Integrated React Query for optimized data fetching and caching.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### 3. **Due Date Picker UX Issues**
+   **Challenge:** Centering the due date label and adding a dropdown calendar icon.
+   **Solution:** Styled the `MobileDatePicker` component with `InputAdornment` to include a dropdown icon and ensured text alignment.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### 4. **Ensuring Mobile & Desktop Responsiveness**
+   **Challenge:** Maintaining a consistent UI across various devices.
+   **Solution:** Used Material UI's responsive design utilities and CSS flexbox/grid for adaptive layouts.
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Contributing
+1. Fork the repository.
+2. Create a new branch:
+   ```bash
+   git checkout -b feature-name
+   ```
+3. Commit changes:
+   ```bash
+   git add .
+   git commit -m "Implemented new feature"
+   ```
+4. Push and create a Pull Request:
+   ```bash
+   git push origin feature-name
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+## License
+This project is licensed under the MIT License. Feel free to modify and use it for your own projects.
+
+---
+
+## Contact
+For any queries or contributions, reach out via GitHub Issues or email: [your-email@example.com](mailto:your-email@example.com).
+
