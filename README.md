@@ -108,5 +108,5 @@ This project is licensed under the MIT License. Feel free to modify and use it f
 ---
 
 ## Contact
-For any queries or contributions, reach out via GitHub Issues or email: [your-email@example.com](mailto:your-email@example.com).
+For any queries or contributions, reach out via GitHub Issues or email: kompalaharshitha@gmail.com.
 
