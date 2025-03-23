@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { firestoreService } from "./firestoreService";
 import TaskFormDialog from "./TaskFormDialog";
+import MenuIcon from "@mui/icons-material/Menu";
+import LeaderboardOutlinedIcon from "@mui/icons-material/LeaderboardOutlined";
+import { MobileDatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import dayjs, { Dayjs } from "dayjs";
 import {
   TextField,
   Button,
@@ -25,7 +31,7 @@ import Header from "./Header";
 import { Task } from "../type";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import {styled} from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
 const TaskForm = ({ user }: { user: any }) => {
   const [open, setOpen] = useState(false);
   const [task, setTask] = useState<Task>({
@@ -124,6 +130,10 @@ const TaskForm = ({ user }: { user: any }) => {
                 },
               }}
             >
+              <MenuIcon
+                fontSize="small"
+                sx={{ marginRight: 1.0, marginLeft: -0.8 }}
+              />
               List
             </Button>
             <Button
@@ -144,6 +154,10 @@ const TaskForm = ({ user }: { user: any }) => {
                 },
               }}
             >
+              <LeaderboardOutlinedIcon
+                fontSize="small"
+                sx={{ marginRight: 1.0, marginLeft: -0.8 }}
+              />
               Board
             </Button>
           </ButtonGroup>
@@ -180,7 +194,7 @@ const TaskForm = ({ user }: { user: any }) => {
               fontWeight: 600,
               fontSize: "12px",
               lineHeight: "140%",
-              width: "60px"
+              width: "60px",
             }}
           >
             Filter by:
@@ -214,8 +228,7 @@ const TaskForm = ({ user }: { user: any }) => {
                 <MenuItem value="personal">Personal</MenuItem>
               </Select>
             </FormControl>
-
-            <TextField
+            {/* <TextField
               type="date"
               value={selectedDueDate || ""}
               onChange={(e) => setSelectedDueDate(e.target.value)}
@@ -233,7 +246,40 @@ const TaskForm = ({ user }: { user: any }) => {
                   paddingBottom: "6px",
                 },
               }}
-            />
+            /> */}
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <MobileDatePicker
+                label="Due Date" // ✅ Shows the label on the dropdown
+                value={selectedDueDate ? dayjs(selectedDueDate) : null}
+                onChange={(newValue: Dayjs | null) =>
+                  setSelectedDueDate(
+                    newValue ? newValue.format("YYYY-MM-DD") : ""
+                  )
+                }
+                slotProps={{
+                  textField: {
+                    variant: "outlined",
+                    fullWidth: true,
+                    sx: {
+                      flex: 1,
+                      borderRadius: "80px",
+                      alignItems: "center",
+                      textAlign: "center",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "80px",
+                        paddingTop: "4px",
+                        paddingBottom: "4px",
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        paddingTop: "6px",
+                        paddingBottom: "6px",
+                      },
+                    },
+                  },
+                }}
+              />
+            </LocalizationProvider>
+
           </Box>
         </Box>
 
@@ -275,8 +321,12 @@ const TaskForm = ({ user }: { user: any }) => {
         handleDeleteTask={handleDeleteTask}
         viewMode={viewMode}
       />
-      <TaskFormDialog open={open} onClose={() => setOpen(false)} userId={user.uid} fetchTasks={fetchTasks}/>
-
+      <TaskFormDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        userId={user.uid}
+        fetchTasks={fetchTasks}
+      />
     </Box>
   );
 };

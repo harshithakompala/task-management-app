@@ -3,6 +3,8 @@ import { AppBar, Toolbar, Typography, Button, Avatar, Box, useMediaQuery } from 
 import { signOut } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { useNavigate } from "react-router-dom";
+import LogoutIcon from '@mui/icons-material/Logout';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 
 interface HeaderProps {
   user: any;
@@ -22,7 +24,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         {/* Application Name */} 
         <Typography variant="h6" sx={{ fontWeight: 600, color: "#2F2F2F", fontSize: 24, lineHeight: "140%", letterSpacing: 0 }}>
-          TaskBuddy
+        <AssignmentOutlinedIcon fontSize="large" sx={{ color: "#2F2F2F", transform: "translateY(8px)" }} />TaskBuddy
         </Typography>
 
         {/* User Profile & Sign Out */}
@@ -38,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
         </Box>
         {!isMobile && (
           <Button sx={{ borderRadius: 12, border: "1px solid #7B198426", color: "#000000", padding: "8px 32px", textTransform: "none", fontWeight: 600, fontSize: 12, lineHeight: "140%", width: 120 }} onClick={handleSignOut}>
-            Logout
+            <LogoutIcon fontSize="small"/>Logout
           </Button>
         )}
       </Box>
