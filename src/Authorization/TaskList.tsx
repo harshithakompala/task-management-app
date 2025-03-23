@@ -21,9 +21,12 @@ import {
   TableRow,
 } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import TaskFormDialog from "./TaskFormDialog";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import { useAuthState } from "react-firebase-hooks/auth"; 
 
 interface Task {
   id: string;
@@ -52,12 +55,20 @@ const TaskList: React.FC<TaskListProps> = ({
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null); 
+  const [openDialog, setOpenDialog] = useState(false);
+
 
   useEffect(() => {
     if (!editingTask) setOpenEditDialog(false);
   }, [editingTask]);
 
+  const handleOpenDialog=()=> {
+    setOpenDialog(true);
+  }
+  const handleCloseDialog= () =>{
+    setOpenDialog(false);
+  }
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLButtonElement>,
     task: Task
@@ -121,13 +132,23 @@ const TaskList: React.FC<TaskListProps> = ({
     await fetchTasks();
   };
 
+  const [expandedSections, setExpandedSections] = useState({
+    todo: true,
+    "in-progress": true,
+    completed: true,
+  });
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
+  };
+
   return (
     <>
       {viewMode === "list" ? (
         <TableContainer
           component={Paper}
           sx={{
-            boxShadow: 4,
+            boxShadow: "none",
             overflow: "auto",
             margin: "0 16px",
             width: "auto",
@@ -136,152 +157,172 @@ const TaskList: React.FC<TaskListProps> = ({
           <Table
             sx={{
               width: "100%",
-              borderCollapse: "separate",
-              borderSpacing: "0 12px",
+              borderCollapse: "collapse",
+              border: "none",
             }}
           >
-            <TableHead>
+            <TableHead sx={{ borderTop: "1px solid #0000001A" }}>
               <TableRow>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    borderBottom: "none",
-                  }}
-                >
-                  Task name
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    borderBottom: "none",
-                  }}
-                >
-                  Description
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    borderBottom: "none",
-                  }}
-                >
-                  Due on
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    borderBottom: "none",
-                  }}
-                >
-                  Status
-                </TableCell>
-                <TableCell
-                  sx={{
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    borderBottom: "none",
-                  }}
-                >
-                  Task Category
-                </TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Task name</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Due on</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Task Status</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Task Category</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {["todo", "in-progress", "completed"].map((status) => (
-                <>
-                  {/* Status Header Row */}
-                  <React.Fragment key={status}>
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        sx={{
-                          backgroundColor:
-                            status === "todo"
-                              ? "#DD85D8"
-                              : status === "in-progress"
-                              ? "#89CFF0"
-                              : "#98FB98",
-                          fontWeight: "bold",
-                          fontSize: { xs: "1rem", md: "1.1rem" },
-                          padding: { xs: "8px", md: "12px 16px" },
-                        }}
-                      >
-                        {status === "todo"
-                          ? "To-Do"
-                          : status === "in-progress"
-                          ? "In Progress"
-                          : "Completed"}
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-
-                  {/* Task Rows */}
-                  {tasks
-                    .filter((task) => task.status === status)
-                    .map((task, index) => (
-                      <TableRow
-                        key={task.id}
-                        sx={{
-                          backgroundColor:
-                            index % 2 === 0 ? "#fafafa" : "white",
-                          "&:hover": { backgroundColor: "#f0f0f0" },
-                        }}
-                      >
-                        <TableCell
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {task.title}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {task.description}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {task.dueDate || "No due date"}
-                        </TableCell>
-                        <TableCell
-                          sx={{
-                            fontWeight: "bold",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                          }}
-                        >
-                          {status === "todo"
-                            ? "To-Do"
+              {(["todo", "in-progress", "completed"] as const).map((status) => (
+                <React.Fragment key={status}>
+                  <TableRow
+                    onClick={() => toggleSection(status)}
+                    sx={{
+                      cursor: "pointer",
+                      borderTopLeftRadius: "12px",
+                      borderTopRightRadius: "12px",
+                      overflow: "hidden",
+                      "& td:first-of-type": {
+                        borderTopLeftRadius: "12px",
+                      },
+                      "& td:last-of-type": {
+                        borderTopRightRadius: "12px",
+                      },
+                      borderTop: "2px solid transparent",
+                    }}
+                  >
+                    <TableCell
+                      colSpan={5}
+                      sx={{
+                        backgroundColor:
+                          status === "todo"
+                            ? "#DD85D8"
                             : status === "in-progress"
-                            ? "In Progress"
-                            : "Completed"}
-                        </TableCell>
-                        <TableCell>
-                          {task.category || "Uncategorized"}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton onClick={(e) => handleMenuOpen(e, task)}>
-                            <MoreHorizIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
+                            ? "#89CFF0"
+                            : "#98FB98",
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        padding: "12px 16px",
+                        position: "relative",
+                      }}
+                    >
+                      {(status === "todo"
+                        ? "Todo"
+                        : status === "in-progress"
+                        ? "In-Progress"
+                        : "Completed") +
+                        ` (${
+                          tasks.filter((task) => task.status === status).length
+                        })`}
+                      <IconButton
+                        sx={{
+                          position: "absolute",
+                          right: "16px",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          backgroundColor: "inherit",
+                        }}
+                      >
+                        {expandedSections[status] ? (
+                          <ExpandLess />
+                        ) : (
+                          <ExpandMore />
+                        )}
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                  {expandedSections[status] &&
+                    (tasks.filter((task) => task.status === status).length >
+                    0 ? (
+                      tasks
+                        .filter((task) => task.status === status)
+                        .map((task, index, taskArray) => (
+                          <TableRow
+                            key={task.id}
+                            sx={{
+                              backgroundColor:
+                                index % 2 === 0 ? "#fafafa" : "white",
+                              "&:hover": { backgroundColor: "#f0f0f0" },
+                              ...(index === taskArray.length - 1 && {
+                                "& td:first-of-type": {
+                                  borderBottomLeftRadius: "12px",
+                                },
+                                "& td:last-of-type": {
+                                  borderBottomRightRadius: "12px",
+                                },
+                              }),
+                            }}
+                          >
+                            <TableCell>{task.title}</TableCell>
+                            <TableCell>
+                              {task.dueDate || "No due date"}
+                            </TableCell>
+                            <TableCell>
+                              {status === "todo"
+                                ? "To-Do"
+                                : status === "in-progress"
+                                ? "In Progress"
+                                : "Completed"}
+                            </TableCell>
+                            <TableCell>
+                              {task.category || "Uncategorized"}
+                            </TableCell>
+                            <TableCell>
+                              <IconButton
+                                onClick={(e) => handleMenuOpen(e, task)}
+                              >
+                                <MoreHorizIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                    ) : (
+                      <>
+                        {status === "todo" && (
+                          <>
+                          <TableRow>
+                            <TableCell
+                              colSpan={4}
+                              sx={{
+                                textAlign: "left",
+                                padding: "12px 12px 12px 60px",
+                              }}
+                            >
+                              <Button
+                                variant="text"
+                                sx={{
+                                  color: "black",
+                                  backgroundColor: "transparent",
+                                  fontWeight: 700,
+                                }}
+                                onClick={handleOpenDialog}
+                              >
+                                + ADD TASK
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                          <TaskFormDialog open={openDialog} onClose={() => setOpenDialog(false)} userId={userId} fetchTasks={fetchTasks}/>
+                        </>
+                        )}
+                        <TableRow>
+                          <TableCell
+                            colSpan={5}
+                            sx={{
+                              textAlign: "center",
+                              padding: "60px 12px",
+                              borderBottomLeftRadius: "12px",
+                              borderBottomRightRadius: "12px",
+                            }}
+                          >
+                            No tasks in{" "}
+                            {status === "todo"
+                              ? "To-Do"
+                              : status === "in-progress"
+                              ? "Progress"
+                              : "Completed"}
+                          </TableCell>
+                        </TableRow>
+                      </>
                     ))}
-                </>
+                  <br />
+                </React.Fragment>
               ))}
             </TableBody>
           </Table>
@@ -301,66 +342,139 @@ const TaskList: React.FC<TaskListProps> = ({
                       padding: 2,
                       width: 320,
                       minHeight: 450,
-                      backgroundColor:
-                        status === "todo"
-                          ? "#DD85D8"
-                          : status === "in-progress"
-                          ? "#89CFF0"
-                          : "#98FB98",
+                      backgroundColor: "#58575112",
                       borderRadius: 2,
                       boxShadow: 3,
+                      display: "flex",
+                      flexDirection: "column",
                     }}
                   >
+                    {/* Status Heading (Aligned to the Top Left) */}
                     <Typography
                       variant="h6"
-                      textAlign="center"
-                      sx={{ fontWeight: "bold" }}
+                      sx={{
+                        fontWeight: "500",
+                        backgroundColor:
+                          status === "todo"
+                            ? "#DD85D8"
+                            : status === "in-progress"
+                            ? "#89CFF0"
+                            : "#98FB98",
+                        fontSize: "14px",
+                        padding: "4px 10px",
+                        width: "fit-content",
+                        borderRadius: "4px",
+                        mb: 3,
+                      }}
                     >
                       {status === "todo"
-                        ? "To-Do"
+                        ? "TO-DO"
                         : status === "in-progress"
-                        ? "In Progress"
-                        : "Completed"}
+                        ? "IN-PROGRESS"
+                        : "COMPLETED"}
                     </Typography>
-                    {tasks
-                      .filter((task) => task.status === status)
-                      .map((task, index) => (
-                        <Draggable
-                          key={task.id}
-                          draggableId={task.id}
-                          index={index}
+
+                    {/* Tasks Container with Centered "No Tasks" Message */}
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent:
+                          tasks.filter((task) => task.status === status)
+                            .length === 0
+                            ? "center"
+                            : "flex-start",
+                        padding: "0 16px"
+                      }}
+                    >
+                      {tasks.filter((task) => task.status === status).length ===
+                      0 ? (
+                        <Typography
+                          variant="body2"
+                          sx={{ textAlign: "center", color: "gray" }}
                         >
-                          {(provided) => (
-                            <Box
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              sx={{
-                                border: "1px solid gray",
-                                borderRadius: 2,
-                                padding: 2,
-                                marginBottom: 2,
-                                backgroundColor: "white",
-                                boxShadow: 2,
-                              }}
+                          No tasks in {status.replace("-", " ")}
+                        </Typography>
+                      ) : (
+                        tasks
+                          .filter((task) => task.status === status)
+                          .map((task, index) => (
+                            <Draggable
+                              key={task.id}
+                              draggableId={task.id}
+                              index={index}
                             >
-                              <Typography variant="h6">{task.title}</Typography>
-                              <Typography variant="body2">
-                                {task.description}
-                              </Typography>
-                              <Typography variant="caption">
-                                Due: {task.dueDate || "No due date"}
-                              </Typography>
-                              <IconButton
-                                onClick={(e) => handleMenuOpen(e, task)}
-                              >
-                                <MoreHorizIcon />
-                              </IconButton>
-                            </Box>
-                          )}
-                        </Draggable>
-                      ))}
-                    {provided.placeholder}
+                              {(provided) => (
+                                <Box
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  sx={{
+                                    border: "1px solid gray",
+                                    borderRadius: 2,
+                                    padding: "8px 16px",
+                                    marginBottom: 2,
+                                    backgroundColor: "white",
+                                    boxShadow: 2,
+                                    width: "100%",
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "space-between",
+                                    }}
+                                  >
+                                    <Typography
+                                      variant="h6"
+                                      sx={{
+                                        fontWeight: "700",
+                                        fontSize: "16px",
+                                      }}
+                                    >
+                                      {task.title}
+                                    </Typography>
+                                    <IconButton
+                                      onClick={(e) => handleMenuOpen(e, task)}
+                                    >
+                                      <MoreHorizIcon />
+                                    </IconButton>
+                                  </Box>
+
+                                  {/* Footer with Category and Due Date */}
+                                  <Box
+                                    sx={{
+                                      display: "flex",
+                                      justifyContent: "space-between",
+                                      marginTop: 5,
+                                      fontSize: "10px",
+                                      color: "gray",
+                                    }}
+                                  >
+                                    <Typography>{task.category}</Typography>
+                                    <Typography>
+                                      {task.dueDate
+                                        ? new Date(
+                                            task.dueDate
+                                          ).toLocaleDateString("en-US", {
+                                            weekday: "short",
+                                            month: "short",
+                                            day: "numeric",
+                                            year: "numeric",
+                                          })
+                                        : "-"}
+                                    </Typography>
+                                  </Box>
+                                </Box>
+                              )}
+                            </Draggable>
+                          ))
+                      )}
+                      {provided.placeholder}
+                    </Box>
                   </Paper>
                 )}
               </Droppable>
@@ -368,7 +482,7 @@ const TaskList: React.FC<TaskListProps> = ({
           </Box>
         </DragDropContext>
       )}
-
+      <TaskFormDialog open={openDialog} onClose={handleCloseDialog} userId={userId} fetchTasks={fetchTasks}/>
       {/* More Options Menu */}
       <Menu
         anchorEl={menuAnchor}
