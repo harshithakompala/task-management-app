@@ -19,6 +19,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  FormControl,
+  InputLabel
 } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import TaskFormDialog from "./TaskFormDialog";
@@ -26,7 +28,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import { useAuthState } from "react-firebase-hooks/auth"; 
+import ReactQuill from "react-quill";
 
 interface Task {
   id: string;
@@ -55,20 +57,19 @@ const TaskList: React.FC<TaskListProps> = ({
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null); 
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-
 
   useEffect(() => {
     if (!editingTask) setOpenEditDialog(false);
   }, [editingTask]);
 
-  const handleOpenDialog=()=> {
+  const handleOpenDialog = () => {
     setOpenDialog(true);
-  }
-  const handleCloseDialog= () =>{
+  };
+  const handleCloseDialog = () => {
     setOpenDialog(false);
-  }
+  };
   const handleMenuOpen = (
     event: React.MouseEvent<HTMLButtonElement>,
     task: Task
@@ -277,29 +278,34 @@ const TaskList: React.FC<TaskListProps> = ({
                       <>
                         {status === "todo" && (
                           <>
-                          <TableRow>
-                            <TableCell
-                              colSpan={4}
-                              sx={{
-                                textAlign: "left",
-                                padding: "12px 12px 12px 60px",
-                              }}
-                            >
-                              <Button
-                                variant="text"
+                            <TableRow>
+                              <TableCell
+                                colSpan={4}
                                 sx={{
-                                  color: "black",
-                                  backgroundColor: "transparent",
-                                  fontWeight: 700,
+                                  textAlign: "left",
+                                  padding: "12px 12px 12px 60px",
                                 }}
-                                onClick={handleOpenDialog}
                               >
-                                + ADD TASK
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                          <TaskFormDialog open={openDialog} onClose={() => setOpenDialog(false)} userId={userId} fetchTasks={fetchTasks}/>
-                        </>
+                                <Button
+                                  variant="text"
+                                  sx={{
+                                    color: "black",
+                                    backgroundColor: "transparent",
+                                    fontWeight: 700,
+                                  }}
+                                  onClick={handleOpenDialog}
+                                >
+                                  + ADD TASK
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                            <TaskFormDialog
+                              open={openDialog}
+                              onClose={() => setOpenDialog(false)}
+                              userId={userId}
+                              fetchTasks={fetchTasks}
+                            />
+                          </>
                         )}
                         <TableRow>
                           <TableCell
@@ -386,7 +392,7 @@ const TaskList: React.FC<TaskListProps> = ({
                             .length === 0
                             ? "center"
                             : "flex-start",
-                        padding: "0 16px"
+                        padding: "0 16px",
                       }}
                     >
                       {tasks.filter((task) => task.status === status).length ===
@@ -482,7 +488,12 @@ const TaskList: React.FC<TaskListProps> = ({
           </Box>
         </DragDropContext>
       )}
-      <TaskFormDialog open={openDialog} onClose={handleCloseDialog} userId={userId} fetchTasks={fetchTasks}/>
+      <TaskFormDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        userId={userId}
+        fetchTasks={fetchTasks}
+      />
       {/* More Options Menu */}
       <Menu
         anchorEl={menuAnchor}
@@ -494,9 +505,28 @@ const TaskList: React.FC<TaskListProps> = ({
       </Menu>
 
       {/* Edit Dialog */}
-      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
-        <DialogTitle>Edit Task</DialogTitle>
-        <DialogContent>
+      <Dialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        fullWidth
+        maxWidth="sm"
+        slotProps={{ paper: { sx: { borderRadius: "16px" } } }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            bgcolor: "white",
+            color: "black",
+            fontWeight: "bold",
+            borderBottom: "2px solid #F5F5F5",
+            padding: "5px",
+          }}
+        >
+          Edit Task
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
           <TextField
             fullWidth
             label="Title"
@@ -506,22 +536,98 @@ const TaskList: React.FC<TaskListProps> = ({
                 prev ? { ...prev, title: e.target.value } : prev
               )
             }
-            sx={{ mt: 2 }}
+            required
+            size="small"
+            sx={{
+              mb: 2,
+              backgroundColor: "#F5F5F5",
+              "& .MuiInputBase-root": { height: "36px" },
+              "& .MuiInputBase-input": { fontSize: "14px", padding: "10px" },
+            }}
           />
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="body1"
+              sx={{ mb: 1, fontWeight: "bold", color: "gray" }}
+            >
+              Description
+            </Typography>
+            <Box
+              sx={{
+                backgroundColor: "#F5F5F5",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+                "& .ql-toolbar": {
+                  order: 2,
+                  borderTop: "1px solid #ccc",
+                  backgroundColor: "#F5F5F5",
+                },
+                "& .ql-container": { order: 1, minHeight: "120px" },
+              }}
+            >
+              <ReactQuill
+                value={editingTask?.description || ""}
+                onChange={(value) =>
+                  setEditingTask((prev) =>
+                    prev ? { ...prev, description: value } : prev
+                  )
+                }
+                theme="snow"
+                modules={{
+                  toolbar: [
+                    ["bold", "italic"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                  ],
+                }}
+                style={{ minHeight: "150px" }}
+              />
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <Button
+                variant={
+                  editingTask?.category === "work" ? "contained" : "outlined"
+                }
+                onClick={() =>
+                  setEditingTask((prev) =>
+                    prev ? { ...prev, category: "work" } : prev
+                  )
+                }
+                sx={{
+                  borderColor: "grey",
+                  color: "grey",
+                  borderRadius: "20px",
+                }}
+              >
+                Work
+              </Button>
+              <Button
+                variant={
+                  editingTask?.category === "personal"
+                    ? "contained"
+                    : "outlined"
+                }
+                onClick={() =>
+                  setEditingTask((prev) =>
+                    prev ? { ...prev, category: "personal" } : prev
+                  )
+                }
+                sx={{
+                  borderColor: "grey",
+                  color: "grey",
+                  borderRadius: "20px",
+                }}
+              >
+                Personal
+              </Button>
+            </Box>
+          
           <TextField
-            fullWidth
-            label="Description"
-            value={editingTask?.description || ""}
-            onChange={(e) =>
-              setEditingTask((prev) =>
-                prev ? { ...prev, description: e.target.value } : prev
-              )
-            }
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Due Date"
+            /* label="Due Date" */
             type="date"
             value={editingTask?.dueDate || ""}
             onChange={(e) =>
@@ -529,38 +635,38 @@ const TaskList: React.FC<TaskListProps> = ({
                 prev ? { ...prev, dueDate: e.target.value } : prev
               )
             }
-            sx={{ mt: 2 }}
-            InputLabelProps={{ shrink: true }}
+            required
+            sx={{ backgroundColor: "#F5F5F5", flex: 1 }}
+            /* InputLabelProps={{ shrink: true }} */
           />
-          <Select
-            fullWidth
-            value={editingTask?.category || "work"}
-            onChange={(e) =>
-              setEditingTask((prev) =>
-                prev ? { ...prev, category: e.target.value } : prev
-              )
-            }
-            sx={{ mt: 2 }}
-          >
-            <MenuItem value="work">Work</MenuItem>
-            <MenuItem value="personel">Personel</MenuItem>
-          </Select>
-          <Select
-            fullWidth
-            value={editingTask?.status || "todo"}
-            onChange={(e) =>
-              setEditingTask((prev) =>
-                prev
-                  ? { ...prev, status: e.target.value as Task["status"] }
-                  : prev
-              )
-            }
-            sx={{ mt: 2 }}
-          >
-            <MenuItem value="todo">To-Do</MenuItem>
-            <MenuItem value="in-progress">In Progress</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-          </Select>
+          
+          <FormControl sx={{ flex: 1 }}>
+            <InputLabel>Status</InputLabel>
+            <Select
+              name="status"
+              value={editingTask?.status || "todo"}
+              sx={{ backgroundColor: "#F5F5F5" }}
+              onChange={(e) =>
+                setEditingTask((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        status: e.target.value as
+                          | "todo"
+                          | "in-progress"
+                          | "completed",
+                      }
+                    : prev
+                )
+              }
+              displayEmpty
+            >
+              <MenuItem value="todo">To-Do</MenuItem>
+              <MenuItem value="in-progress">In Progress</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+            </Select>
+          </FormControl>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
