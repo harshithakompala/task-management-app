@@ -29,6 +29,7 @@ import { db } from "./firebaseConfig";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import ReactQuill from "react-quill";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface Task {
   id: string;
@@ -45,6 +46,7 @@ interface TaskListProps {
   userId: string;
   handleDeleteTask: (taskId: string) => Promise<void>;
   viewMode: "list" | "board";
+  onClose?: ()=> void;
 }
 
 const TaskList: React.FC<TaskListProps> = ({
@@ -53,12 +55,14 @@ const TaskList: React.FC<TaskListProps> = ({
   userId,
   handleDeleteTask,
   viewMode,
+  onClose,
 }) => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!editingTask) setOpenEditDialog(false);
@@ -521,15 +525,27 @@ const TaskList: React.FC<TaskListProps> = ({
             color: "black",
             fontWeight: "bold",
             borderBottom: "2px solid #F5F5F5",
-            padding: "5px",
+            padding: "15px",
+            mb: 3
           }}
         >
           Edit Task
+          <IconButton
+          onClick={() => setOpenEditDialog(false)}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: "gray",
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <TextField
             fullWidth
-            label="Title"
+            placeholder="Task Title"
             value={editingTask?.title || ""}
             onChange={(e) =>
               setEditingTask((prev) =>
@@ -546,12 +562,6 @@ const TaskList: React.FC<TaskListProps> = ({
             }}
           />
           <Box sx={{ mb: 2 }}>
-            <Typography
-              variant="body1"
-              sx={{ mb: 1, fontWeight: "bold", color: "gray" }}
-            >
-              Description
-            </Typography>
             <Box
               sx={{
                 backgroundColor: "#F5F5F5",
@@ -570,6 +580,7 @@ const TaskList: React.FC<TaskListProps> = ({
             >
               <ReactQuill
                 value={editingTask?.description || ""}
+                placeholder="Description"
                 onChange={(value) =>
                   setEditingTask((prev) =>
                     prev ? { ...prev, description: value } : prev
@@ -584,6 +595,14 @@ const TaskList: React.FC<TaskListProps> = ({
                 }}
                 style={{ minHeight: "150px" }}
               />
+              <style>
+                {`
+                .ql-editor::before {
+                  font-style: normal !important;
+                  color: gray; 
+                  }
+                `}
+            </style>
             </Box>
           </Box>
           <Box sx={{ display: "flex", gap: 2, mb: 2, alignItems: "center" }}>

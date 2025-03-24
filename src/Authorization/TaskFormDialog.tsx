@@ -16,6 +16,8 @@ import {
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { firestoreService } from "./firestoreService";
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
 
 interface Task {
   id: string;
@@ -83,15 +85,27 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
           color: "black",
           fontWeight: "bold",
           borderBottom: "2px solid #F5F5F5",
-          padding: "5px",
+          padding: "15px",
+          mb: 3,
         }}
       >
         Create Task
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: "gray",
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
       </DialogTitle>
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={{ p: 3, paddingTop: "10px" }}>
         <TextField
-          label="Title"
           name="title"
+          placeholder="Task Title"
           value={task.title}
           onChange={(e) => setTask({ ...task, title: e.target.value })}
           fullWidth
@@ -106,9 +120,6 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
         />
 
         <Box sx={{ mb: 2 }}>
-          <Typography variant="body1" sx={{ mb: 1, fontWeight: "bold", color: "gray" }}>
-            Description
-          </Typography>
           <Box
             sx={{
               backgroundColor: "#F5F5F5",
@@ -117,7 +128,11 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              "& .ql-toolbar": { order: 2, borderTop: "1px solid #ccc", backgroundColor: "#F5F5F5" },
+              "& .ql-toolbar": {
+                order: 2,
+                borderTop: "1px solid #ccc",
+                backgroundColor: "#F5F5F5",
+              },
               "& .ql-container": { order: 1, minHeight: "120px" },
             }}
           >
@@ -125,9 +140,23 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
               value={task.description}
               onChange={(value) => setTask({ ...task, description: value })}
               theme="snow"
-              modules={{ toolbar: [["bold", "italic"], [{ list: "ordered" }, { list: "bullet" }]] }}
+              placeholder="Description"
+              modules={{
+                toolbar: [
+                  ["bold", "italic"],
+                  [{ list: "ordered" }, { list: "bullet" }],
+                ],
+              }}
               style={{ minHeight: "150px" }}
             />
+            <style>
+            {`
+            .ql-editor::before {
+              font-style: normal !important;
+              color: gray; 
+              }
+            `}
+            </style>
           </Box>
         </Box>
 
@@ -167,7 +196,10 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
               onChange={(e) =>
                 setTask({
                   ...task,
-                  status: e.target.value as "todo" | "in-progress" | "completed",
+                  status: e.target.value as
+                    | "todo"
+                    | "in-progress"
+                    | "completed",
                 })
               }
               displayEmpty
@@ -178,7 +210,6 @@ const TaskFormDialog: React.FC<TaskFormDialogProps> = ({
             </Select>
           </FormControl>
         </Box>
-
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3 }}>

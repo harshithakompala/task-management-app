@@ -93,6 +93,10 @@ const TaskForm = ({ user }: { user: any }) => {
     setTasks(userTasks);
   };
 
+  const handleClose = (): void => {
+    setOpen(false); // ✅ Closes the dialog
+  };
+  
   const handleDeleteTask = async (taskId: string) => {
     await firestoreService.deleteTask(user.uid, taskId);
     fetchTasks();
@@ -228,7 +232,7 @@ const TaskForm = ({ user }: { user: any }) => {
                 <MenuItem value="personal">Personal</MenuItem>
               </Select>
             </FormControl>
-            {/* <TextField
+            <TextField
               type="date"
               value={selectedDueDate || ""}
               onChange={(e) => setSelectedDueDate(e.target.value)}
@@ -246,40 +250,7 @@ const TaskForm = ({ user }: { user: any }) => {
                   paddingBottom: "6px",
                 },
               }}
-            /> */}
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <MobileDatePicker
-                label="Due Date" // ✅ Shows the label on the dropdown
-                value={selectedDueDate ? dayjs(selectedDueDate) : null}
-                onChange={(newValue: Dayjs | null) =>
-                  setSelectedDueDate(
-                    newValue ? newValue.format("YYYY-MM-DD") : ""
-                  )
-                }
-                slotProps={{
-                  textField: {
-                    variant: "outlined",
-                    fullWidth: true,
-                    sx: {
-                      flex: 1,
-                      borderRadius: "80px",
-                      alignItems: "center",
-                      textAlign: "center",
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "80px",
-                        paddingTop: "4px",
-                        paddingBottom: "4px",
-                      },
-                      "& .MuiOutlinedInput-input": {
-                        paddingTop: "6px",
-                        paddingBottom: "6px",
-                      },
-                    },
-                  },
-                }}
-              />
-            </LocalizationProvider>
-
+            />
           </Box>
         </Box>
 
@@ -320,6 +291,7 @@ const TaskForm = ({ user }: { user: any }) => {
         userId={user.uid}
         handleDeleteTask={handleDeleteTask}
         viewMode={viewMode}
+        onClose={handleClose}
       />
       <TaskFormDialog
         open={open}
