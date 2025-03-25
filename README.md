@@ -3,7 +3,7 @@
 ## Project Overview
 TaskBuddy is a responsive task management application built with React and Firebase. It enables users to manage their tasks efficiently with features like authentication, task categorization, drag-and-drop functionality, batch actions. The application supports both list and board views, providing a seamless user experience across different screen sizes.
 
-Here I have provided the Deployment URL: [https://tasks-90d23.web.app](https://task-management-app-mu-plum.vercel.app/)
+Here I have provided the Deployment URL: https://task-management-app-mu-plum.vercel.app
 ---
 
 ## Features Implemented
